@@ -1,0 +1,12 @@
+name: auto-changelog
+on:
+  pull_request:
+    types: [opened]
+jobs:
+  add_changelog:
+    runs-on: ubuntu-latest
+    env:
+      changelog_filename: CHANGELOG.md
+    steps:
+    - run: test -f ./changelog.md || touch CHANGELOG.md
+    - run: line=$(head -n 1 $changelog_filename | tr '[:lower:]' '[:upper:]') && [[ $line = PATCH || $line = MINOR || $line = MAJOR ]]; [[ $? -eq 0 ]] && echo "FILE ALREADY CONTAINS METADATA" || echo "PATCH\n${github.event.pull_request.title}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
