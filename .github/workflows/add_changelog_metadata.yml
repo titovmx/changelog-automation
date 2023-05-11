@@ -16,14 +16,10 @@ jobs:
       run: test -f ./changelog.md || touch CHANGELOG.md
     - name: Add version and PR title at the beginning
       run: echo "PATCH\n${{github.event.pull_request.title}}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
-    - name: Dump gh context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: |
-        echo "$GITHUB_CONTEXT"
     - name: Commit changelog
       run: |
-        git config --global user.name ${{github.event.pull_request.user.name}}
-        git config --global user.email ${{github.event.sender.email}}
-        git commit -am "Automated Changelog"
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "Update changelog with version and title"
         git push
