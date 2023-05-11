@@ -18,7 +18,7 @@ jobs:
       run: echo "PATCH\n${{github.event.pull_request.title}}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
     - name: Commit changelog
       run: |
-        git config --global user.name ${{github.event.pull_request.user.name}}
-        git config --global user.email ${{github.event.pull_request.user.email}}
+        git config --global user.name ${{github.event.sender.name}}
+        git config --global user.email ${{github.event.sender.email}}
         git commit -am "Automated Changelog"
         git push
