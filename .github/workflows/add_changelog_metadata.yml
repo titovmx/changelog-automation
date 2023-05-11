@@ -15,8 +15,10 @@ jobs:
     - name: Check for existing file
       run: test -f ./changelog.md || touch CHANGELOG.md
     - name: add version and PR title at the beginning
-      run: ls
+      run: line=$(head -n 1 $changelog_filename | tr '[:lower:]' '[:upper:]') && [[ $line = PATCH || $line = MINOR || $line = MAJOR ]]; [[ $? -eq 0 ]] && echo "FILE ALREADY CONTAINS METADATA" || (echo "PATCH\n${github.event.pull_request.title}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename)
     - name: Commit changelog
       run: |
+        git config --global user.name ${github.event.pull_request.user.name}
+        git config --global user.email ${github.event.pull_request.user.email}
         git commit -am "Automated Changelog"
         git push
