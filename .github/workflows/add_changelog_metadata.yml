@@ -15,7 +15,10 @@ jobs:
     - name: Check for existing file
       run: test -f ./changelog.md || touch CHANGELOG.md
     - name: add version and PR title at the beginning
-      run: line=$(head -n 1 $changelog_filename | tr '[:lower:]' '[:upper:]') && [[ $line = PATCH || $line = MINOR || $line = MAJOR ]]; [[ $? -eq 0 ]] || echo "[Debug][filename=$changelog_filename][line=$line]"
+      run: |
+        line=$(head -n 1 $changelog_filename | tr '[:lower:]' '[:upper:]')
+        echo $line
+        echo "[Debug][filename=$changelog_filename][line=$line]"
     - name: Commit changelog
       run: |
         git config --global user.name ${github.event.pull_request.user.name}
