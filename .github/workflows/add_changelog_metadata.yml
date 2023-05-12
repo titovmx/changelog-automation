@@ -14,11 +14,27 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: gh pr checkout ${{ github.event.pull_request.number }}
-    - name: Check for existing file
+    - name: Get changed files
+      id: files
+      uses: jitterbit/get-changed-files@v1
+    - name: Check if Changelog file is in PR diff
+      id: is_changelog_updated
+      run: |
+        is_chagelog_updated=0
+        for changed_file in ${{ steps.files.outputs.all }}; do
+          if [ ${changed_file} == "CHANGELOG.md"]
+          then is_changelog_updated=1
+          fi
+        done
+        echo ${is_changelog_updated}
+    - name: Create Changelog file if it does not exist
+      if: ${{ steps.is_changelog_updated == 0 }}
       run: test -f ./changelog.md || touch CHANGELOG.md
     - name: Add version and PR title at the beginning
-      run: echo "PATCH\n${{github.event.pull_request.title}}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
+      if: ${{ steps.is_changelog_updated == 0 }}
+      run: echo -e "PATCH\n${{github.event.pull_request.title}}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
     - name: Commit changelog
+      if: ${{ steps.is_changelog_updated == 0 }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
