@@ -34,8 +34,9 @@ jobs:
           new_version="${major_v:-0}.${minor_v:-0}.${new_patch_v}"
         fi
         new_line="${new_version} ${title}"
-        sed -i '' '1d' $changelog_filename
-        sed -i '' "1s/.*/${new_line}/" $changelog_filename
+        sed -i .bak '1d' $changelog_filename
+        sed -i .bak "1s/.*/${new_line}/" $changelog_filename
+        rm "${changelog_filename}.bak" 
     - name: Commit changelog
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
