@@ -26,15 +26,15 @@ jobs:
           then is_changelog_updated=1
           fi
         done
-        echo ${is_changelog_updated}
+        echo "result=${is_changelog_updated}" >> $GITHUB_OUTPUT
     - name: Create Changelog file if it does not exist
-      if: ${{ steps.is_changelog_updated == 0 }}
+      if: ${{ steps.is_changelog_updated.outputs.result == 0 }}
       run: test -f ./changelog.md || touch CHANGELOG.md
     - name: Add version and PR title at the beginning
-      if: ${{ steps.is_changelog_updated == 0 }}
+      if: ${{ steps.is_changelog_updated.outputs.result == 0 }}
       run: echo -e "PATCH\n${{github.event.pull_request.title}}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
     - name: Commit changelog
-      if: ${{ steps.is_changelog_updated == 0 }}
+      if: ${{ steps.is_changelog_updated.outputs.result == 0 }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
