@@ -1,4 +1,4 @@
-name: auto-changelog
+name: add-changelog-metadata
 on:
   pull_request:
     types: [opened]
@@ -32,7 +32,7 @@ jobs:
       run: test -f ./changelog.md || touch CHANGELOG.md
     - name: Add version and PR title at the beginning
       if: ${{ steps.is_changelog_updated.outputs.result == 0 }}
-      run: echo -e "PATCH\n${{github.event.pull_request.title}}\n\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
+      run: echo -e "PATCH\n${{github.event.pull_request.title}}\n" | cat - $changelog_filename > temp && mv temp $changelog_filename
     - name: Commit changelog
       if: ${{ steps.is_changelog_updated.outputs.result == 0 }}
       env:
