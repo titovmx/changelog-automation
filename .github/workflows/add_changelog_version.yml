@@ -25,13 +25,13 @@ jobs:
         patch_v=$(echo $version | cut -d "." -f 3)
         if [[ $version_level == "MAJOR" ]]; then
           new_major_v=$((major_v+1))
-          new_version="${new_major_v}.${minor_v}.${patch_v}"
+          new_version="${new_major_v}.${minor_v:-0}.${patch_v:-0}"
         elif [[ $version_level == "MINOR" ]]; then
           new_minor_v=$((minor_v+1))
-          new_version="${major_v}.${new_minor_v}.${patch_v}"
+          new_version="${major_v:-0}.${new_minor_v}.${patch_v:-0}"
         elif [[ $version_level == "PATCH" ]]; then
           new_patch_v=$((patch_v+1))
-          new_version="${major_v}.${minor_v}.${new_patch_v}"
+          new_version="${major_v:-0}.${minor_v:-0}.${new_patch_v}"
         fi
         new_line="${new_version} ${title}"
         sed -i '' '1d' $changelog_filename
