@@ -20,9 +20,9 @@ jobs:
     - name: Check if Changelog file is in PR diff
       id: is_changelog_updated
       run: |
-        is_chagelog_updated=0
+        is_changelog_updated=0
         for changed_file in ${{ steps.files.outputs.all }}; do
-          if [ ${changed_file} == "CHANGELOG.md"]
+        if [[ ${changed_file} == *"CHANGELOG.md" ]]
           then is_changelog_updated=1
           fi
         done
