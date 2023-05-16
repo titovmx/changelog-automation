@@ -1,2 +1,2 @@
 PATCH
-Add catalog of items
+Add new catalog of items
