@@ -1,0 +1,48 @@
+name: add-changelog-version
+on:
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '*CHANGELOG.md'
+jobs:
+  add_version:
+    runs-on: ubuntu-latest
+    env:
+      changelog_filename: CHANGELOG.md
+    steps:
+    - name: Checkout repo 
+      uses: actions/checkout@v3
+    - name: Read changelog metadata
+      id: changelog_metadata
+      run: |
+        version_level=$(sed -n '1{p;q;}' $changelog_filename)
+        title=$(sed -n '2{p;q;}' $changelog_filename)
+        version_line=$(sed -n '4{p;q;}' $changelog_filename)
+        version=$(echo $version_line | cut -d " " -f 1)
+        major_v=$(echo $version | cut -d "." -f 1)
+        minor_v=$(echo $version | cut -d "." -f 2)
+        patch_v=$(echo $version | cut -d "." -f 3)
+        if [[ $version_level == "MAJOR" ]]; then
+          new_major_v=$((major_v+1))
+          new_version="${new_major_v}.${minor_v}.${patch_v}"
+        elif [[ $version_level == "MINOR" ]]; then
+          new_minor_v=$((minor_v+1))
+          new_version="${major_v}.${new_minor_v}.${patch_v}"
+        elif [[ $version_level == "PATCH" ]]; then
+          new_patch_v=$((patch_v+1))
+          new_version="${major_v}.${minor_v}.${new_patch_v}"
+        fi
+        new_line="${new_version} ${title}"
+        sed -i '' '1d' $changelog_filename
+        sed -i '' "1s/.*/${new_line}/" $changelog_filename
+    - name: Commit changelog
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "Update changelog with new version"
+        git push
+      
