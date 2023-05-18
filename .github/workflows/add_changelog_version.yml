@@ -13,7 +13,7 @@ jobs:
     steps:
     - name: Checkout repo 
       uses: actions/checkout@v3
-    - name: Read changelog metadata
+    - name: Replace changelog metadata with the new version
       id: changelog_metadata
       run: |
         version_level=$(sed -n '1{p;q;}' $changelog_filename)
@@ -33,7 +33,7 @@ jobs:
           new_patch_v=$((patch_v+1))
           new_version="${major_v:-0}.${minor_v:-0}.${new_patch_v}"
         fi
-        new_line="${new_version} ${title}"
+        new_line="${new_version} ${title} $(date +'%Y-%m-%d')"
         sed -i.bak '1d' $changelog_filename
         sed -i.bak "1s/.*/${new_line}/" $changelog_filename
         rm "${changelog_filename}.bak" 
