@@ -1,2 +1,1 @@
-PATCH
-Add catalog of items
+0.0.1 Add new catalog of items
