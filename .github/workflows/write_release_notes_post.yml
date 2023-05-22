@@ -1,0 +1,35 @@
+name: write-release-notes-post
+on:
+  schedule:
+    - cron: '0 12 1 * *'
+jobs:
+  write_blog_post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v1.0.1
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Read Changelog for the last month
+        id: last_month_changelog
+        run: |
+          while read -r line
+          do
+            [ -z "$line" ] && continue
+            date=$(echo $line | rev | cut -d " " -f 1 | rev)
+            month=$(echo $date | cut -d "-" -f 2)
+            [[ $month -eq $(date +'%m') ]] && result="${result}\n${line}"
+          done < ./CHANGELOG.md
+          echo "result=${result}" >> $GITHUB_OUTPUT
+      - name: Call OpenAI API
+        id: call_openai
+        run: |
+          echo "output=$(./scripts/call_open_ai.sh ${{ steps.last_month_changelog.outputs.result }} ${{ secrets.OPEN_AI_TOKEN }})" >> $GITHUB_OUTPUT
+        shell: bash
+      - name: Add blog file
+        run: |
+          year=$(date +%Y)
+          month=$(date -v "-1m" +%B)
+          mkdir ./blog/content/blog/${year}_${month}
+          echo -e "---\ntitle: ${month}\ndate: '$(date +'%Y-%m-%d')'\ndescription: '${month} release notes'\n---\n${{ steps.call_openai.outputs.result }}" > ./blog/content/blog/${year}_${month}/index.md
+      - name: Create PR

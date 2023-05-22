@@ -1,8 +1,3 @@
-echo '$0: Script Name: '$0
-
-echo "\nInput": $1
-echo "\nOutput:" 
-
 curl=`cat <<EOS
 curl https://api.openai.com/v1/completions \
   -H 'Content-Type: application/json' \
@@ -14,7 +9,7 @@ curl https://api.openai.com/v1/completions \
   "temperature": 1.0
 
 }' \
---insecure
+--insecure | jq '.choices[]'.text
 EOS`
 
 eval ${curl}
