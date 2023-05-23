@@ -29,7 +29,7 @@ jobs:
         id: call_openai
         run: |
           chmod +x ./scripts/call_open_ai.sh
-          echo "result=$(./scripts/call_open_ai.sh "${{ steps.last_month_changelog.outputs.result }}" "${{ secrets.OPEN_AI_TOKEN }}")" >> $GITHUB_OUTPUT
+          echo "result=$(./scripts/call_open_ai.sh "${{ steps.last_month_changelog.outputs.result }}" "${{ secrets.OPEN_AI_TOKEN }}" | tr -d '"')" >> $GITHUB_OUTPUT
         shell: bash
       - name: Calculate previous month
         id: calc_prev_month

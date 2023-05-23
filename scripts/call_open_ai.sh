@@ -9,7 +9,7 @@ curl https://api.openai.com/v1/completions \
   "temperature": 1.0
 
 }' \
---insecure | jq -r '.choices[]'.text
+--insecure | jq '.choices[]'.text
 EOS`
 
 eval ${curl}
