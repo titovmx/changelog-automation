@@ -1,7 +1,3 @@
-echo '$0: Script Name: '$0
-echo '$1: Keyword: '$1
-echo '$1: KEY: '$2
-
 curl=`cat <<EOS
 curl https://api.openai.com/v1/completions \
   -H 'Content-Type: application/json' \
