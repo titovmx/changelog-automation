@@ -14,6 +14,10 @@ jobs:
       - name: Checkout branch
         run: |
           git checkout -b blog-post
+      - name: Calculate previous month
+        id: calc_prev_month
+        run: |
+          echo "result=$(date --date="$(date +%Y-%m-%d) -1 month" +%B)" >> $GITHUB_OUTPUT
       - name: Read Changelog for the last month
         id: last_month_changelog
         run: |
@@ -22,26 +26,25 @@ jobs:
             [ -z "$line" ] && continue
             date=$(echo $line | rev | cut -d " " -f 1 | rev)
             month=$(echo $date | cut -d "-" -f 2)
-            [[ $month -eq $(date +'%m') ]] && result="${result}\n${line}"
+            [[ $month -eq ${{ steps.calc_prev_month.outputs.result }} ]] && result="${result}\n${line}"
           done < ./CHANGELOG.md
           echo "result=${result}" >> $GITHUB_OUTPUT
       - name: Call OpenAI API
         id: call_openai
+        if: ${{ steps.last_month_changelog.outputs.result != '' }}
         run: |
           chmod +x ./scripts/call_open_ai.sh
           echo "result=$(./scripts/call_open_ai.sh "${{ steps.last_month_changelog.outputs.result }}" "${{ secrets.OPEN_AI_TOKEN }}" | tr -d '"')" >> $GITHUB_OUTPUT
         shell: bash
-      - name: Calculate previous month
-        id: calc_prev_month
-        run: |
-          echo "result=$(date --date="$(date +%Y-%m-%d) -1 month" +%B)" >> $GITHUB_OUTPUT
       - name: Add blog file
+        if: ${{ steps.last_month_changelog.outputs.result != '' }}
         run: |
           year=$(date +%Y)
           month=${{ steps.calc_prev_month.outputs.result }}
           mkdir ./blog/content/blog/${year}_${month}
           echo -e "---\ntitle: ${month}\ndate: '$(date +'%Y-%m-%d')'\ndescription: '${month} release notes'\n---\n${{ steps.call_openai.outputs.result }}" > ./blog/content/blog/${year}_${month}/index.md
       - name: Commit changes
+        if: ${{ steps.last_month_changelog.outputs.result != '' }}
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
@@ -49,6 +52,7 @@ jobs:
           git commit -m "Add ${{ steps.calc_prev_month.outputs.result }} blog post"
           git push --set-upstream origin blog-post
       - name: Create PR
+        if: ${{ steps.last_month_changelog.outputs.result != '' }}
         uses: devops-infra/action-pull-request@v0.5.5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
