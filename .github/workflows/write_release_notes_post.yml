@@ -10,6 +10,9 @@ jobs:
         uses: dcarbone/install-jq-action@v1.0.1
       - name: Checkout repo
         uses: actions/checkout@v3
+      - name: Checkout branch
+        run: |
+          git checkout -b blog-post
       - name: Read Changelog for the last month
         id: last_month_changelog
         run: |
@@ -32,4 +35,18 @@ jobs:
           month=$(date -v "-1m" +%B)
           mkdir ./blog/content/blog/${year}_${month}
           echo -e "---\ntitle: ${month}\ndate: '$(date +'%Y-%m-%d')'\ndescription: '${month} release notes'\n---\n${{ steps.call_openai.outputs.result }}" > ./blog/content/blog/${year}_${month}/index.md
+      - name: Commit changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Add $(date -v "-1m" +%B) blog post"
+          git push
       - name: Create PR
+        uses: devops-infra/action-pull-request@v0.5.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: blog-post
+          target_branch: master
+          title: $(date -v "-1m" +%B) release notes blog post
+          body: '**Automated pull request**'
