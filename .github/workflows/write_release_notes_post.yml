@@ -33,7 +33,7 @@ jobs:
       - name: Add blog file
         run: |
           year=$(date +%Y)
-          month=$(date -v "-1m" +%B)
+          month=$(date --date="$(date +%Y-%m-15) -1 month" +%B)
           mkdir ./blog/content/blog/${year}_${month}
           echo -e "---\ntitle: ${month}\ndate: '$(date +'%Y-%m-%d')'\ndescription: '${month} release notes'\n---\n${{ steps.call_openai.outputs.result }}" > ./blog/content/blog/${year}_${month}/index.md
       - name: Commit changes
