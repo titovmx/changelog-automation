@@ -30,10 +30,14 @@ jobs:
         run: |
           echo "output=$(./scripts/call_open_ai.sh ${{ steps.last_month_changelog.outputs.result }} ${{ secrets.OPEN_AI_TOKEN }})" >> $GITHUB_OUTPUT
         shell: bash
+      - name: Calculate previous month
+        id: calc_prev_month
+        run: |
+          echo "result=$(date --date="$(date +%Y-%m-%d) -1 month" +%B)" >> GITHUB_OUTPUT
       - name: Add blog file
         run: |
           year=$(date +%Y)
-          month=$(date --date="$(date +%Y-%m-%d) -1 month" +%B)
+          month=${{ steps.calc_prev_month.outputs.result }}
           mkdir ./blog/content/blog/${year}_${month}
           echo -e "---\ntitle: ${month}\ndate: '$(date +'%Y-%m-%d')'\ndescription: '${month} release notes'\n---\n${{ steps.call_openai.outputs.result }}" > ./blog/content/blog/${year}_${month}/index.md
       - name: Commit changes
@@ -41,13 +45,13 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Add $(date --date="$(date +%Y-%m-%d) -1 month" +%B) blog post"
-          git push
+          git commit -m "Add ${{ steps.calc_prev_month.outputs.result }} blog post"
+          git push --set-upstream origin blog-post
       - name: Create PR
         uses: devops-infra/action-pull-request@v0.5.5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_branch: blog-post
           target_branch: master
-          title: $(date --date="$(date +%Y-%m-%d) -1 month" +%B) release notes blog post
+          title: ${{ steps.calc_prev_month.outputs.result }} release notes blog post
           body: '**Automated pull request**'
