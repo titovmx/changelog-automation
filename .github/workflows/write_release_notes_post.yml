@@ -33,7 +33,7 @@ jobs:
       - name: Add blog file
         run: |
           year=$(date +%Y)
-          month=$(date --date="$(date +%Y-%m-15) -1 month" +%B)
+          month=$(date --date="$(date +%Y-%m-%d) -1 month" +%B)
           mkdir ./blog/content/blog/${year}_${month}
           echo -e "---\ntitle: ${month}\ndate: '$(date +'%Y-%m-%d')'\ndescription: '${month} release notes'\n---\n${{ steps.call_openai.outputs.result }}" > ./blog/content/blog/${year}_${month}/index.md
       - name: Commit changes
@@ -41,7 +41,7 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git add .
-          git commit -m "Add $(date -v "-1m" +%B) blog post"
+          git commit -m "Add $(date --date="$(date +%Y-%m-%d) -1 month" +%B) blog post"
           git push
       - name: Create PR
         uses: devops-infra/action-pull-request@v0.5.5
@@ -49,5 +49,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           source_branch: blog-post
           target_branch: master
-          title: $(date -v "-1m" +%B) release notes blog post
+          title: $(date --date="$(date +%Y-%m-%d) -1 month" +%B) release notes blog post
           body: '**Automated pull request**'
