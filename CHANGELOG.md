@@ -1,4 +1,4 @@
-PATCH
+MINOR
 add first payment method
 
 0.2.0 add cart 2023-04-23
